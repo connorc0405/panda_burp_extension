@@ -2,20 +2,21 @@ package burp;
 
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 
-public class BurpExtender implements IBurpExtender
-{
+public class BurpExtender implements IBurpExtender {
     //
     // implement IBurpExtender
     //
 
+    // provide stdout and stderr to any helper code
+    protected static PrintWriter stdout;
+    protected static PrintWriter stderr;
+
+    // TODO these should be set in the UI
     private final String pandaServerIp = "localhost";
     private final int pandaServerPort = 8081;
-    
+
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks)
     {
@@ -23,29 +24,19 @@ public class BurpExtender implements IBurpExtender
         callbacks.setExtensionName("PANDA HTTP CMP Analysis");
 
         // obtain our output and error streams
-        PrintWriter stdout = new PrintWriter(callbacks.getStdout(), true);
-        PrintWriter stderr = new PrintWriter(callbacks.getStderr(), true);
+        stdout = new PrintWriter(callbacks.getStdout(), true);
+        stderr = new PrintWriter(callbacks.getStderr(), true);
 
-        // write a message to our output stream
-        stdout.println("Hello output");
-
-        Socket sock = new Socket();
-        InetAddress addr;
+        // connect to socket
+        Socket pySock;
         try {
-            addr = InetAddress.getByName(pandaServerIp);
-        } catch (java.net.UnknownHostException e) {
-            stderr.println("Oopsie addr error :(");
-            return;
-        }
-
-        SocketAddress sockAddr = new InetSocketAddress(addr, pandaServerPort);
-
-        try {
-            sock.connect(sockAddr);
+            pySock = new Socket(pandaServerIp, pandaServerPort);
         } catch (IOException e) {
-            stderr.println("Oopsie socket error :(");
+            e.printStackTrace(stderr);
             return;
         }
+
+        stdout.println("Connected to socket");
 
     }
 }
