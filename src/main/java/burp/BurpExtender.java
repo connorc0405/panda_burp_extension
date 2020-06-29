@@ -1,8 +1,13 @@
 package burp;
 
+import com.google.protobuf.Message;
+
+import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.ByteBuffer;
 
 public class BurpExtender implements IBurpExtender {
     //
@@ -38,5 +43,31 @@ public class BurpExtender implements IBurpExtender {
 
         stdout.println("Connected to socket");
 
+        PandaMessages.BurpMessage msg = PandaMessages.BurpMessage.newBuilder().setCommand(
+                PandaMessages.Command.newBuilder().setCmd("begin_record").build()
+        ).build();
+
+        try {
+            sendMessage(msg, pySock);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+
     }
+
+    public void sendMessage(Message msg, Socket sock) throws IOException {
+        byte[] msgBytes = msg.toByteArray();
+
+        ByteBuffer sendBuf = ByteBuffer.allocate(msgBytes.length + 4);
+        sendBuf.putInt(msgBytes.length + 4);  // defaults to big-endian
+        sendBuf.put(msgBytes);
+        sendBuf.flip();
+
+        OutputStream oStream = sock.getOutputStream();
+        BufferedOutputStream bOStream = new BufferedOutputStream(oStream);
+        bOStream.write(sendBuf.array());
+        bOStream.flush();
+    }
+
 }

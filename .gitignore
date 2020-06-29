@@ -4,3 +4,6 @@ target/
 # Intellij IDEA
 .idea/
 *.imi
+
+# Generated Protocol Buffer Source
+PandaMessages.java
