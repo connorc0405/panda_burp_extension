@@ -53,6 +53,25 @@ public class BurpExtender implements IBurpExtender {
             e.printStackTrace();
             return;
         }
+        stdout.println("Sent start msg");
+
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+        PandaMessages.BurpMessage msg2 = PandaMessages.BurpMessage.newBuilder().setCommand(
+                PandaMessages.Command.newBuilder().setCmd("end_record").build()
+        ).build();
+
+        try {
+            sendMessage(msg2, pySock);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return;
+        }
+        stdout.println("Sent stop msg");
 
     }
 
