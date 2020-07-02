@@ -1,21 +1,30 @@
-package burp;
+package com.ccumming.burp.view;
 
+
+import com.ccumming.burp.HostControlPanel;
+import com.ccumming.burp.view.IView;
 
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionListener;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 
+import burp.IBurpExtenderCallbacks;
+import burp.IMessageEditor;
+import burp.ITab;
+import burp.ITextEditor;
 
-public class PandaTabView extends JPanel implements ITab {
+
+public class PandaTabView extends JPanel implements ITab, IView {
 
   private final JPanel hostControlPanel;
 
-  PandaTabView(IBurpExtenderCallbacks callbacks) {
+  public PandaTabView(IBurpExtenderCallbacks callbacks) {
     hostControlPanel = new HostControlPanel();
     hostControlPanel.setBackground(Color.LIGHT_GRAY);
 
@@ -59,5 +68,15 @@ public class PandaTabView extends JPanel implements ITab {
   @Override
   public Component getUiComponent() {
     return this;
+  }
+
+  @Override
+  public void displayTaintResults(String results) {
+    throw new UnsupportedOperationException("Not implemented");
+  }
+
+  @Override
+  public void registerButtonListener(ActionListener listener) {
+    throw new UnsupportedOperationException("Not implemented");
   }
 }

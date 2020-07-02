@@ -1,4 +1,4 @@
-package burp;
+package com.ccumming.burp;
 
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
@@ -20,7 +20,7 @@ public class HostControlPanel extends JPanel {
   private final JTextField pandaServerPortField;
   private final JButton pandaServerConnectButton;
 
-  HostControlPanel() {
+  public HostControlPanel() {
     this.httpServerHostLabel = new JLabel("HTTP Server Host");
     this.httpServerHostField = new JTextField("", 20);
     this.httpServerPortLabel = new JLabel(":");

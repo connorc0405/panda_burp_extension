@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option java_package = "burp";
+option java_package = "com.ccumming.burp";
 
 message BurpMessage {
   oneof type {

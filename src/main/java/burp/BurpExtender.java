@@ -2,6 +2,8 @@ package burp;
 
 import com.google.protobuf.Message;
 
+import com.ccumming.burp.view.PandaTabView;
+
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
