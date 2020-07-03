@@ -2,6 +2,7 @@ package burp;
 
 import com.google.protobuf.Message;
 
+import com.ccumming.burp.view.IView;
 import com.ccumming.burp.view.PandaTabView;
 
 import java.io.BufferedOutputStream;
@@ -35,7 +36,8 @@ public class BurpExtender implements IBurpExtender {
         stderr = new PrintWriter(callbacks.getStderr(), true);
 
         // build UI
-        ITab pandaTab = new PandaTabView(callbacks);
+        IView pandaTab = new PandaTabView(callbacks);
+
         callbacks.addSuiteTab(pandaTab);
 
 //        // connect to socket

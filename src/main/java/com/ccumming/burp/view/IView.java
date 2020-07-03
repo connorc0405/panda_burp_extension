@@ -2,7 +2,9 @@ package com.ccumming.burp.view;
 
 import java.awt.event.ActionListener;
 
-public interface IView {
+import burp.ITab;
+
+public interface IView extends ITab {
 
   /**
    * Display PANDA taint results on the screen.
