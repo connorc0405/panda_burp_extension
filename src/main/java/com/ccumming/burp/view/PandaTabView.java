@@ -1,8 +1,6 @@
 package com.ccumming.burp.view;
 
-
 import com.ccumming.burp.HostControlPanel;
-import com.ccumming.burp.view.IView;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -22,7 +20,8 @@ import burp.ITextEditor;
 
 public class PandaTabView extends JPanel implements ITab, IView {
 
-  private final JPanel hostControlPanel;
+  private final HostControlPanel hostControlPanel;
+  private final JTextArea taintResults;
 
   public PandaTabView(IBurpExtenderCallbacks callbacks) {
     hostControlPanel = new HostControlPanel();
@@ -45,7 +44,7 @@ public class PandaTabView extends JPanel implements ITab, IView {
 
     JSplitPane editorSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, requestEditor.getComponent(), taintGroupEditor.getComponent());
 
-    JTextArea taintResults = new JTextArea();
+    this.taintResults = new JTextArea();
     taintResults.setText("Taint Results Placeholder!!!!");
     taintResults.setEditable(false);
     JSplitPane editorResultsSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, editorSplit, taintResults);
@@ -72,11 +71,12 @@ public class PandaTabView extends JPanel implements ITab, IView {
 
   @Override
   public void displayTaintResults(String results) {
-    throw new UnsupportedOperationException("Not implemented");
+    this.taintResults.setText(results);
   }
 
   @Override
   public void registerButtonListener(ActionListener listener) {
-    throw new UnsupportedOperationException("Not implemented");
+    this.hostControlPanel.registerButtonListener(listener);
   }
+
 }

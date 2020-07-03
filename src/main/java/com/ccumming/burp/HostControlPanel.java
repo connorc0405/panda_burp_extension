@@ -1,5 +1,7 @@
 package com.ccumming.burp;
 
+import java.awt.event.ActionListener;
+
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -71,6 +73,11 @@ public class HostControlPanel extends JPanel {
                     .addComponent(pandaServerPortField)
                     .addComponent(pandaServerConnectButton)));
 
+  }
+
+  public void registerButtonListener(ActionListener listener) {
+    this.pandaServerConnectButton.addActionListener(listener);
+    this.httpServerSendButton.addActionListener(listener);
   }
 
 }
