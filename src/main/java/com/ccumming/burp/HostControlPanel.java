@@ -80,4 +80,20 @@ public class HostControlPanel extends JPanel {
     this.httpServerSendButton.addActionListener(listener);
   }
 
+  public String getHttpServerHost() {
+    return this.httpServerHostField.getText();
+  }
+
+  public String getHttpServerPort() {
+    return this.httpServerPortField.getText();
+  }
+
+  public String getPandaServerHost() {
+    return this.pandaServerHostField.getText();
+  }
+
+  public String getPandaServerPort() {
+    return this.pandaServerPortField.getText();
+  }
+
 }

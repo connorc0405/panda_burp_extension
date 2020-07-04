@@ -79,4 +79,24 @@ public class PandaTabView extends JPanel implements ITab, IView {
     this.hostControlPanel.registerButtonListener(listener);
   }
 
+  @Override
+  public String getHttpServerHost() {
+    return this.hostControlPanel.getHttpServerHost();
+  }
+
+  @Override
+  public String getHttpServerPort() {
+    return this.hostControlPanel.getHttpServerPort();
+  }
+
+  @Override
+  public String getPandaServerHost() {
+    return this.hostControlPanel.getPandaServerHost();
+  }
+
+  @Override
+  public String getPandaServerPort() {
+    return this.hostControlPanel.getPandaServerPort();
+  }
+
 }

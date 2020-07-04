@@ -18,4 +18,28 @@ public interface IView extends ITab {
    */
   public void registerButtonListener(ActionListener listener);
 
+  /**
+   * Return the HTTP Server Host field.
+   * @return the HTTP server host.
+   */
+  public String getHttpServerHost();
+
+  /**
+   * Return the HTTP Server port field.
+   * @return the HTTP server port.
+   */
+  public String getHttpServerPort();
+
+  /**
+   * Return the PANDA Server Host field.
+   * @return the PANDA server host.
+   */
+  public String getPandaServerHost();
+
+  /**
+   * Return the PANDA Server port field.
+   * @return the PANDA server port.
+   */
+  public String getPandaServerPort();
+
 }

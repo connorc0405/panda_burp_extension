@@ -7,10 +7,6 @@ import com.ccumming.burp.view.PandaTabView;
 
 public class BurpExtender implements IBurpExtender {
 
-    // TODO these should be set in the UI
-    private final String pandaServerIp = "localhost";
-    private final int pandaServerPort = 8081;
-
     @Override
     public void registerExtenderCallbacks(IBurpExtenderCallbacks callbacks)
     {
