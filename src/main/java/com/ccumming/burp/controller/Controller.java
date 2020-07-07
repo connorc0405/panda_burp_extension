@@ -12,8 +12,8 @@ import burp.IBurpExtenderCallbacks;
 
 public class Controller implements IController {
 
-  private IModel model;
-  private IView view;
+  private final IModel model;
+  private final IView view;
   private final PrintWriter stdout;
   private final PrintWriter stderr;
 
