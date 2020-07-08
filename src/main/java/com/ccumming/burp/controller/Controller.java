@@ -20,12 +20,14 @@ public class Controller implements IController {
 
   private final IModel model;
   private final IView view;
+  private final ProgStatus progStatus;
   private final PrintWriter stdout;
   private final PrintWriter stderr;
 
   public Controller(IModel model, IView view, IBurpExtenderCallbacks callbacks) {
     this.model = model;
     this.view = view;
+    this.progStatus = ProgStatus.NOT_CONNECTED;
     this.stdout = new PrintWriter(callbacks.getStdout(), true);
     this.stderr = new PrintWriter(callbacks.getStderr(), true);
   }
@@ -41,7 +43,7 @@ public class Controller implements IController {
         this.stdout.println("Connect was pressed");
         break;
       default:
-        stderr.println("Idk that button");
+        this.stderr.println("Idk that button");
         break;
     }
     stdout.println(((JButton)e.getSource()).getText() + " was pressed.");
