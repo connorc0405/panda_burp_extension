@@ -6,6 +6,7 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.nio.ByteBuffer;
 
 public class NetUtils {
@@ -32,6 +33,9 @@ public class NetUtils {
     int bytes_read = 0;
     while (bytes_read < len_buf.length) {
       bytes_read += sock.getInputStream().read(len_buf, bytes_read, len_buf.length - bytes_read);
+      if (bytes_read == -1) {
+        throw new SocketException("Socket is closed");
+      }
     }
 
     int payload_size = ByteBuffer.wrap(len_buf).getInt();
