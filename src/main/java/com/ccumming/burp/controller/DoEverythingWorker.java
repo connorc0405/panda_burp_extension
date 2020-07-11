@@ -73,7 +73,7 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
       throw new Exception("Expected response type to be RecordingStarted");
     }
 
-    // TODO Send HTTP
+    // TODO Send HTTP and receive response
     IHttpService httpService = new IHttpService() {
       @Override
       public String getHost() {
@@ -93,17 +93,42 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
     };
     IHttpRequestResponse response = callbacks.makeHttpRequest(httpService, httpMsg);
 
-    // TODO Receive HTTP response
-
     // TODO Send stop recording command
+    NetUtils.sendMessage(
+            PandaMessages.BurpMessage.newBuilder()
+                    .setCommand(
+                            PandaMessages.Command.newBuilder()
+                                    .setCmdType(PandaMessages.CommandType.StopRecording)
+                                    .build()
+                    )
+                    .build()
+            , this.pySock);
 
     // TODO Receive confirmation of recording stopped
+    resp = NetUtils.recvMessage(this.pySock);
+    if (!resp.hasResponse()) {
+      throw new Exception("BurpMessage should include a Response");
+    }
+    if (resp.getResponse().getRespType() != PandaMessages.ResponseType.RecordingStopped) {
+      throw new Exception("Expected response type to be RecordingStopped");
+    }
 
     // TODO Send taint bytes
 
-    // TODO Receive taint result
 
-    return null;
+    // TODO Receive taint result
+    resp = NetUtils.recvMessage(this.pySock);
+    if (!resp.hasResponse()) {
+      throw new Exception("BurpMessage should include a Response");
+    }
+    if (resp.getResponse().getRespType() != PandaMessages.ResponseType.ReturnTaintResult) {
+      throw new Exception("Expected response type to be ReturnTaintResult");
+    }
+    if (!resp.getResponse().hasTaintResult()) {
+      throw new Exception("Expected response to include TaintResult");
+    }
+
+    return resp.getResponse().getTaintResult();
   }
 
   @Override
