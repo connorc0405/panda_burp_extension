@@ -7,6 +7,7 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
+import java.nio.charset.StandardCharsets;
 
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
@@ -22,6 +23,8 @@ public class PandaTabView extends JPanel implements ITab, IView {
 
   private final HostControlPanel hostControlPanel;
   private final JTextArea taintResults;
+  private final ITextEditor taintGroupEditor;
+  private final IMessageEditor requestEditor;
 
   public PandaTabView(IBurpExtenderCallbacks callbacks) {
     hostControlPanel = new HostControlPanel();
@@ -38,9 +41,9 @@ public class PandaTabView extends JPanel implements ITab, IView {
     c.weightx = 1.0;
     this.add(hostControlPanel, c);
 
-    IMessageEditor requestEditor = callbacks.createMessageEditor(null, true);
+    this.requestEditor = callbacks.createMessageEditor(null, true);
 
-    ITextEditor taintGroupEditor = callbacks.createTextEditor();
+    this.taintGroupEditor = callbacks.createTextEditor();
 
     JSplitPane editorSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, requestEditor.getComponent(), taintGroupEditor.getComponent());
 
@@ -67,6 +70,16 @@ public class PandaTabView extends JPanel implements ITab, IView {
   @Override
   public Component getUiComponent() {
     return this;
+  }
+
+  @Override
+  public byte[] getHttpMessage() {
+    return this.requestEditor.getMessage();
+  }
+
+  @Override
+  public String getTaintSelection() {
+    return new String(taintGroupEditor.getText(), StandardCharsets.UTF_8);
   }
 
   @Override

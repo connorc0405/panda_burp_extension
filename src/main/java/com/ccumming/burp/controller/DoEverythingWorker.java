@@ -3,6 +3,7 @@ package com.ccumming.burp.controller;
 import com.ccumming.burp.PandaMessages;
 import com.ccumming.burp.model.IModel;
 import com.ccumming.burp.util.NetUtils;
+import com.ccumming.burp.view.IView;
 
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -10,18 +11,28 @@ import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
 
+import burp.IBurpExtenderCallbacks;
+import burp.IHttpRequestResponse;
+import burp.IHttpService;
+
 /**
  * This will run as a new thread and will handle everything from sending the command to start recording, to receiving the final result.
  */
 public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, Void> {
 
+  private final IModel model;
+  private final IView view;
   Socket pySock;
+  IBurpExtenderCallbacks callbacks;
   PrintWriter stdout;
   PrintWriter stderr;
 
-  DoEverythingWorker(Socket pySock, PrintWriter stdout, PrintWriter stderr) {
+  DoEverythingWorker(IModel model, IView view, Socket pySock, IBurpExtenderCallbacks callbacks, PrintWriter stdout, PrintWriter stderr) {
     super();
+    this.model = model;
+    this.view = view;
     this.pySock = pySock;
+    this.callbacks = callbacks;
     this.stdout = stdout;
     this.stderr = stderr;
   }
@@ -29,9 +40,18 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
   @Override
   protected PandaMessages.TaintResult doInBackground() throws Exception {
 
-    // TODO Validate taint preference formatting
+    // TODO better handling of errors (don't throw exceptions everywhere)?
 
-    stdout.println("About to send 1st msg");
+    // Validate taint selection formatting
+    if (!model.validateTaintSelection(view.getTaintSelection())) {
+      throw new Exception("Taint selection is incorrectly formatted");  // TODO more specific exception?
+    }
+
+    // Check HTTP not null (empty)
+    byte[] httpMsg = view.getHttpMessage();
+    if (httpMsg == null) {
+      throw new Exception("HTTP message cannot be empty");
+    }
 
     // Send start recording command
     NetUtils.sendMessage(
@@ -54,7 +74,24 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
     }
 
     // TODO Send HTTP
+    IHttpService httpService = new IHttpService() {
+      @Override
+      public String getHost() {
+        return view.getHttpServerHost();
+      }
 
+      @Override
+      public int getPort() {
+        return Integer.parseInt(view.getHttpServerPort());
+        // TODO change return type to int
+      }
+
+      @Override
+      public String getProtocol() {
+        return "http";
+      }
+    };
+    IHttpRequestResponse response = callbacks.makeHttpRequest(httpService, httpMsg);
 
     // TODO Receive HTTP response
 

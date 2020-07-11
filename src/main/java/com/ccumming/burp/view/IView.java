@@ -7,6 +7,18 @@ import burp.ITab;
 public interface IView extends ITab {
 
   /**
+   * Return the HTTP message.
+   * @return the HTTP message byte array.
+   */
+  public byte[] getHttpMessage();
+
+  /**
+   * Return the taint selection.
+   * @return a taint selection {@link String}.
+   */
+  public String getTaintSelection();
+
+  /**
    * Display PANDA taint results on the screen.
    * @param results the taint results.
    */

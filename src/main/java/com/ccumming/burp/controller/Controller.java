@@ -20,12 +20,14 @@ public class Controller implements IController {
   private final IView view;
   private Socket pySock;
   private ProgStatus progStatus;
+  private IBurpExtenderCallbacks callbacks;
   private final PrintWriter stdout;
   private final PrintWriter stderr;
 
   public Controller(IModel model, IView view, IBurpExtenderCallbacks callbacks) {
     this.model = model;
     this.view = view;
+    this.callbacks = callbacks;
     this.progStatus = ProgStatus.NOT_CONNECTED;
     this.stdout = new PrintWriter(callbacks.getStdout(), true);
     this.stderr = new PrintWriter(callbacks.getStderr(), true);
@@ -36,7 +38,7 @@ public class Controller implements IController {
     JButton buttonPressed = (JButton)e.getSource();
     switch (buttonPressed.getText()) {
       case "Send":
-        SwingWorker<PandaMessages.TaintResult, Void> worker = new DoEverythingWorker(this.pySock, this.stdout, this.stderr);
+        SwingWorker<PandaMessages.TaintResult, Void> worker = new DoEverythingWorker(this.model, this.view, this.pySock, this.callbacks, this.stdout, this.stderr);
         worker.execute();
         break;
       case "Connect":
