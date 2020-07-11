@@ -5,14 +5,12 @@ import com.ccumming.burp.model.IModel;
 import com.ccumming.burp.view.IView;
 
 import java.awt.event.ActionEvent;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.nio.ByteBuffer;
 
 import javax.swing.JButton;
+import javax.swing.SwingWorker;
 
 import burp.IBurpExtenderCallbacks;
 
@@ -38,7 +36,8 @@ public class Controller implements IController {
     JButton buttonPressed = (JButton)e.getSource();
     switch (buttonPressed.getText()) {
       case "Send":
-        new DoEverythingWorker(this.stdout, this.stderr).execute();
+        SwingWorker<PandaMessages.TaintResult, Void> worker = new DoEverythingWorker(this.pySock, this.stdout, this.stderr);
+        worker.execute();
         break;
       case "Connect":
         this.connectPandaServer();
