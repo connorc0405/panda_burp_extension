@@ -40,10 +40,12 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
   @Override
   protected PandaMessages.TaintResult doInBackground() throws Exception {
 
+    // TODO Run ops in EDT thread?
     // TODO better handling of errors (don't throw exceptions everywhere)?
 
     // Validate taint selection formatting
-    if (!model.validateTaintSelection(view.getTaintSelection())) {
+    String taintSelection = view.getTaintSelection();
+    if (!model.validateTaintSelection(taintSelection)) {
       throw new Exception("Taint selection is incorrectly formatted");  // TODO more specific exception?
     }
 
@@ -114,7 +116,7 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
     }
 
     // TODO Send taint bytes
-
+    // TODO build TaintBytes using TaintByteGroups (prob do in model?)
 
     // TODO Receive taint result
     resp = NetUtils.recvMessage(this.pySock);
