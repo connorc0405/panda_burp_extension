@@ -52,6 +52,7 @@ public class Controller implements IController {
   }
 
   private void connectPandaServer() {
+    // TODO close old socket if exists
     String pandaHost = this.view.getPandaServerHost();
     int pandaPort = Integer.parseInt(this.view.getPandaServerPort());
     try {

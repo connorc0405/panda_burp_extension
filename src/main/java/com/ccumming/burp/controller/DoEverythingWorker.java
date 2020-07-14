@@ -7,6 +7,7 @@ import com.ccumming.burp.view.IView;
 
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.SwingWorker;
@@ -95,6 +96,9 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
     };
     IHttpRequestResponse response = callbacks.makeHttpRequest(httpService, httpMsg);
 
+    String httpResp = new String(response.getResponse(), StandardCharsets.US_ASCII);
+    this.stdout.println(httpResp);
+
     // TODO Send stop recording command
     NetUtils.sendMessage(
             PandaMessages.BurpMessage.newBuilder()
@@ -116,7 +120,16 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
     }
 
     // TODO Send taint bytes
-    // TODO build TaintBytes using TaintByteGroups (prob do in model?)
+    NetUtils.sendMessage(
+            PandaMessages.BurpMessage.newBuilder()
+                    .setCommand(
+                            PandaMessages.Command.newBuilder()
+                                    .setCmdType(PandaMessages.CommandType.SetTaintBytes)
+                                    .setTaintBytes(taintSelection)
+                                    .build()
+                    )
+                    .build()
+            , this.pySock);
 
     // TODO Receive taint result
     resp = NetUtils.recvMessage(this.pySock);
