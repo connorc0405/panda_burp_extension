@@ -20,7 +20,6 @@ public class HostControlPanel extends JPanel {
   private final JTextField pandaServerHostField;
   private final JLabel pandaServerPortLabel;
   private final JTextField pandaServerPortField;
-  private final JButton pandaServerConnectButton;
 
   public HostControlPanel() {
     this.httpServerHostLabel = new JLabel("HTTP Server Host");
@@ -33,7 +32,6 @@ public class HostControlPanel extends JPanel {
     this.pandaServerHostField = new JTextField("", 20);
     this.pandaServerPortLabel = new JLabel(":");
     this.pandaServerPortField = new JTextField("", 5);
-    this.pandaServerConnectButton = new JButton("Connect");
 
 
     GroupLayout layout = new GroupLayout(this);
@@ -56,8 +54,7 @@ public class HostControlPanel extends JPanel {
                     .addComponent(httpServerPortField)
                     .addComponent(pandaServerPortField))
             .addGroup(layout.createParallelGroup()
-                    .addComponent(httpServerSendButton)
-                    .addComponent(pandaServerConnectButton)));
+                    .addComponent(httpServerSendButton)));
 
     layout.setVerticalGroup(layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
@@ -70,13 +67,10 @@ public class HostControlPanel extends JPanel {
                     .addComponent(pandaServerHostLabel)
                     .addComponent(pandaServerHostField)
                     .addComponent(pandaServerPortLabel)
-                    .addComponent(pandaServerPortField)
-                    .addComponent(pandaServerConnectButton)));
-
+                    .addComponent(pandaServerPortField)));
   }
 
   public void registerButtonListener(ActionListener listener) {
-    this.pandaServerConnectButton.addActionListener(listener);
     this.httpServerSendButton.addActionListener(listener);
   }
 

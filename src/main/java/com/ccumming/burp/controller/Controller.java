@@ -2,14 +2,13 @@ package com.ccumming.burp.controller;
 
 import com.ccumming.burp.PandaMessages;
 import com.ccumming.burp.model.IModel;
-import com.ccumming.burp.view.IView;
+import com.ccumming.burp.view.AbstractView;
 
 import java.awt.event.ActionEvent;
-import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.Socket;
 
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import burp.IBurpExtenderCallbacks;
@@ -17,18 +16,15 @@ import burp.IBurpExtenderCallbacks;
 public class Controller implements IController {
 
   private final IModel model;
-  private final IView view;
-  private Socket pySock;
-  private ProgStatus progStatus;
+  private final AbstractView view;
   private IBurpExtenderCallbacks callbacks;
   private final PrintWriter stdout;
   private final PrintWriter stderr;
 
-  public Controller(IModel model, IView view, IBurpExtenderCallbacks callbacks) {
+  public Controller(IModel model, AbstractView view, IBurpExtenderCallbacks callbacks) {
     this.model = model;
     this.view = view;
     this.callbacks = callbacks;
-    this.progStatus = ProgStatus.NOT_CONNECTED;
     this.stdout = new PrintWriter(callbacks.getStdout(), true);
     this.stderr = new PrintWriter(callbacks.getStderr(), true);
   }
@@ -38,11 +34,11 @@ public class Controller implements IController {
     JButton buttonPressed = (JButton)e.getSource();
     switch (buttonPressed.getText()) {
       case "Send":
-        SwingWorker<PandaMessages.TaintResult, Void> worker = new DoEverythingWorker(this.model, this.view, this.pySock, this.callbacks, this.stdout, this.stderr);
+        if (!validateSendInput()) {
+          return;
+        }
+        SwingWorker<PandaMessages.TaintResult, Void> worker = new DoEverythingWorker(this.model, this.view, this.callbacks, this.stdout, this.stderr);
         worker.execute();
-        break;
-      case "Connect":
-        this.connectPandaServer();
         break;
       default:
         this.stderr.println("Idk that button");
@@ -51,16 +47,54 @@ public class Controller implements IController {
     stdout.println(((JButton)e.getSource()).getText() + " was pressed.");
   }
 
-  private void connectPandaServer() {
-    // TODO close old socket if exists
-    String pandaHost = this.view.getPandaServerHost();
-    int pandaPort = Integer.parseInt(this.view.getPandaServerPort());
-    try {
-      this.pySock = new Socket(pandaHost, pandaPort);
-      this.progStatus = ProgStatus.CONNECTED;
-    } catch (IOException ex) {
-      ex.printStackTrace(stderr);
+  /**
+   * Determine if we can start the process of communicating with PANDA.
+   * Checks relevant fields.  Does not check the socket.
+   * Displays alert box if field is not supplied/valid.
+   * @return if the required fields are valid.
+   */
+  private boolean validateSendInput() {
+    String dialogTitle = "Insufficient information";
+
+    // Check HTTP server address and port
+    if (!model.validateHost(view.getHttpServerHost()) || !model.validatePort(view.getHttpServerPort())) {
+      JOptionPane.showMessageDialog(this.view,
+              "Valid HTTP server address and port are required",
+              dialogTitle,
+              JOptionPane.WARNING_MESSAGE);
+      return false;
     }
+
+    // Check PANDA server address and port
+    if (!model.validateHost(view.getPandaServerHost()) || !model.validatePort(view.getPandaServerPort())) {
+      JOptionPane.showMessageDialog(this.view,
+              "Valid PANDA server address and port are required",
+              dialogTitle,
+              JOptionPane.WARNING_MESSAGE);
+      return false;
+    }
+
+    // Check HTTP not null (empty)
+    byte[] httpMsg = view.getHttpMessage();
+    if (httpMsg == null) {
+      JOptionPane.showMessageDialog(this.view,
+              "HTTP message cannot be empty",
+              dialogTitle,
+              JOptionPane.WARNING_MESSAGE);
+      return false;
+    }
+
+    // Validate taint selection formatting
+    String taintSelection = view.getTaintSelection();
+    if (!model.validateTaintSelection(taintSelection)) {
+      JOptionPane.showMessageDialog(this.view,
+              "Taint selection is empty or invalid",
+              dialogTitle,
+              JOptionPane.WARNING_MESSAGE);
+      return false;
+    }
+
+    return true;
   }
 
 }

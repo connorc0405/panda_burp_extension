@@ -19,7 +19,7 @@ import burp.ITab;
 import burp.ITextEditor;
 
 
-public class PandaTabView extends JPanel implements ITab, IView {
+public class PandaTabView extends AbstractView implements ITab {
 
   private final HostControlPanel hostControlPanel;
   private final JTextArea taintResults;

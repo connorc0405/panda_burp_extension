@@ -7,7 +7,7 @@ public interface IModel {
 
   boolean validateHost(String host);
 
-  boolean validatePort(int port);
+  boolean validatePort(String port);
 
   boolean validateTaintSelection(String taintSelection);
 

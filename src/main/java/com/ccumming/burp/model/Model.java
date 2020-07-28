@@ -11,8 +11,15 @@ public class Model implements IModel {
   }
 
   @Override
-  public boolean validatePort(int port) {
-    return port > 0 && port <= 65535;
+  public boolean validatePort(String port) {
+    int intPort;
+    try {
+      intPort = Integer.parseInt(port);
+    } catch (NumberFormatException e) {
+      return false;
+    }
+
+    return intPort > 0 && intPort <= 65535;
   }
 
   /**

@@ -3,13 +3,15 @@ package com.ccumming.burp.controller;
 import com.ccumming.burp.PandaMessages;
 import com.ccumming.burp.model.IModel;
 import com.ccumming.burp.util.NetUtils;
-import com.ccumming.burp.view.IView;
+import com.ccumming.burp.view.AbstractView;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 
+import javax.swing.JOptionPane;
 import javax.swing.SwingWorker;
 
 import burp.IBurpExtenderCallbacks;
@@ -22,38 +24,37 @@ import burp.IHttpService;
 public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, Void> {
 
   private final IModel model;
-  private final IView view;
+  private final AbstractView view;
   Socket pySock;
   IBurpExtenderCallbacks callbacks;
   PrintWriter stdout;
   PrintWriter stderr;
 
-  DoEverythingWorker(IModel model, IView view, Socket pySock, IBurpExtenderCallbacks callbacks, PrintWriter stdout, PrintWriter stderr) {
+  DoEverythingWorker(IModel model, AbstractView view, IBurpExtenderCallbacks callbacks, PrintWriter stdout, PrintWriter stderr) {
     super();
     this.model = model;
     this.view = view;
-    this.pySock = pySock;
     this.callbacks = callbacks;
     this.stdout = stdout;
     this.stderr = stderr;
   }
 
+  /**
+   * Return the results of a PANDA taint run on the selected bytes of user-provided HTTP.
+   * Requirements:
+   *  The HTTP field must not be empty.
+   *  The taint selection field must not be empty.
+   *  The HTTP and PANDA server addresses and ports must not be empty.
+   * @return a {@link com.ccumming.burp.PandaMessages.TaintResult}.
+   * @throws Exception if one occurs
+   */
   @Override
   protected PandaMessages.TaintResult doInBackground() throws Exception {
-
     // TODO Run ops in EDT thread?
-    // TODO better handling of errors (don't throw exceptions everywhere)?
 
-    // Validate taint selection formatting
-    String taintSelection = view.getTaintSelection();
-    if (!model.validateTaintSelection(taintSelection)) {
-      throw new Exception("Taint selection is incorrectly formatted");  // TODO more specific exception?
-    }
-
-    // Check HTTP not null (empty)
-    byte[] httpMsg = view.getHttpMessage();
-    if (httpMsg == null) {
-      throw new Exception("HTTP message cannot be empty");
+    // Open socket
+    if (!connectPandaServer()) {
+      return null;
     }
 
     // Send start recording command
@@ -94,10 +95,7 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
         return "http";
       }
     };
-    IHttpRequestResponse response = callbacks.makeHttpRequest(httpService, httpMsg);
-
-    String httpResp = new String(response.getResponse(), StandardCharsets.US_ASCII);
-    this.stdout.println(httpResp);
+    IHttpRequestResponse response = callbacks.makeHttpRequest(httpService, view.getHttpMessage());
 
     // TODO Send stop recording command
     NetUtils.sendMessage(
@@ -125,7 +123,7 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
                     .setCommand(
                             PandaMessages.Command.newBuilder()
                                     .setCmdType(PandaMessages.CommandType.SetTaintBytes)
-                                    .setTaintBytes(taintSelection)
+                                    .setTaintBytes(view.getTaintSelection())
                                     .build()
                     )
                     .build()
@@ -153,6 +151,27 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
     } catch (InterruptedException | ExecutionException ex) {
       ex.printStackTrace(this.stderr);
     }
+  }
 
+  /**
+   * Open a connection to the PANDA server.
+   * Requirements:
+   *  The PANDA server address and port fields must not be empty/invalid.
+   *
+   * @return true on success, false on failure.
+   */
+  private boolean connectPandaServer() {
+    String pandaHost = this.view.getPandaServerHost();
+    int pandaPort = Integer.parseInt(this.view.getPandaServerPort());
+    try {
+      this.pySock = new Socket(pandaHost, pandaPort);
+    } catch (IOException ex) {
+      JOptionPane.showMessageDialog(this.view,
+              "Could not connect to PANDA server",
+              "Connection Error",
+              JOptionPane.WARNING_MESSAGE);
+      return false;
+    }
+    return true;
   }
 }
