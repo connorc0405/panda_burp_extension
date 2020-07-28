@@ -5,9 +5,9 @@ package com.ccumming.burp.model;
  */
 public interface IModel {
 
-  boolean validateHost(String host);
+  boolean isValidHostname(String host);
 
-  boolean validatePort(String port);
+  boolean isValidPort(String port);
 
   boolean validateTaintSelection(String taintSelection);
 

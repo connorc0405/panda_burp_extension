@@ -17,7 +17,7 @@ public class Controller implements IController {
 
   private final IModel model;
   private final AbstractView view;
-  private IBurpExtenderCallbacks callbacks;
+  private final IBurpExtenderCallbacks callbacks;
   private final PrintWriter stdout;
   private final PrintWriter stderr;
 
@@ -57,7 +57,7 @@ public class Controller implements IController {
     String dialogTitle = "Insufficient information";
 
     // Check HTTP server address and port
-    if (!model.validateHost(view.getHttpServerHost()) || !model.validatePort(view.getHttpServerPort())) {
+    if (!model.isValidHostname(view.getHttpServerHost()) || !model.isValidPort(view.getHttpServerPort())) {
       JOptionPane.showMessageDialog(this.view,
               "Valid HTTP server address and port are required",
               dialogTitle,
@@ -66,7 +66,7 @@ public class Controller implements IController {
     }
 
     // Check PANDA server address and port
-    if (!model.validateHost(view.getPandaServerHost()) || !model.validatePort(view.getPandaServerPort())) {
+    if (!model.isValidHostname(view.getPandaServerHost()) || !model.isValidPort(view.getPandaServerPort())) {
       JOptionPane.showMessageDialog(this.view,
               "Valid PANDA server address and port are required",
               dialogTitle,

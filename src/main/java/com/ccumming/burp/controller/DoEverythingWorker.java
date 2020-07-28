@@ -23,16 +23,14 @@ import burp.IHttpService;
  */
 public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, Void> {
 
-  private final IModel model;
   private final AbstractView view;
   Socket pySock;
   IBurpExtenderCallbacks callbacks;
   PrintWriter stdout;
   PrintWriter stderr;
 
-  DoEverythingWorker(IModel model, AbstractView view, IBurpExtenderCallbacks callbacks, PrintWriter stdout, PrintWriter stderr) {
+  DoEverythingWorker(AbstractView view, IBurpExtenderCallbacks callbacks, PrintWriter stdout, PrintWriter stderr) {
     super();
-    this.model = model;
     this.view = view;
     this.callbacks = callbacks;
     this.stdout = stdout;

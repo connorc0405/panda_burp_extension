@@ -6,12 +6,12 @@ package com.ccumming.burp.model;
 public class Model implements IModel {
 
   @Override
-  public boolean validateHost(String host) {
+  public boolean isValidHostname(String host) {
     return true;  // TODO
   }
 
   @Override
-  public boolean validatePort(String port) {
+  public boolean isValidPort(String port) {
     int intPort;
     try {
       intPort = Integer.parseInt(port);
@@ -70,9 +70,6 @@ public class Model implements IModel {
         return false;
       }
     }
-    if (!Character.isDigit(taintSelection.charAt(taintSelection.length()-1))) {
-      return false;
-    }
-    return true;
+    return Character.isDigit(taintSelection.charAt(taintSelection.length() - 1));
   }
 }

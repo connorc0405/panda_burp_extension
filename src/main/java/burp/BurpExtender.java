@@ -5,9 +5,9 @@ import com.ccumming.burp.controller.IController;
 import com.ccumming.burp.model.IModel;
 import com.ccumming.burp.model.Model;
 import com.ccumming.burp.view.AbstractView;
-import com.ccumming.burp.view.IView;
 import com.ccumming.burp.view.PandaTabView;
 
+@SuppressWarnings("unused")
 public class BurpExtender implements IBurpExtender {
 
     @Override

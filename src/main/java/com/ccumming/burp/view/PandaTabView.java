@@ -9,7 +9,6 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
 import java.nio.charset.StandardCharsets;
 
-import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 

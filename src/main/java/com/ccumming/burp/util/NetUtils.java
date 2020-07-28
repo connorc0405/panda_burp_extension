@@ -47,8 +47,7 @@ public class NetUtils {
       bytes_read += sock.getInputStream().read(payload_buf, bytes_read, payload_buf.length - bytes_read);
     }
 
-    PandaMessages.BurpMessage msg = PandaMessages.BurpMessage.parseFrom(payload_buf);
-    return msg;
+    return PandaMessages.BurpMessage.parseFrom(payload_buf);
   }
 
 }
