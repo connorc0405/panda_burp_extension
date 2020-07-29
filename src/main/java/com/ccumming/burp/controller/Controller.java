@@ -37,7 +37,7 @@ public class Controller implements IController {
         if (!validateSendInput()) {
           return;
         }
-        SwingWorker<PandaMessages.TaintResult, Void> worker = new DoEverythingWorker(this.model, this.view, this.callbacks, this.stdout, this.stderr);
+        SwingWorker<PandaMessages.TaintResult, Void> worker = new DoEverythingWorker(this.view, this.callbacks, this.stdout, this.stderr);
         worker.execute();
         break;
       default:

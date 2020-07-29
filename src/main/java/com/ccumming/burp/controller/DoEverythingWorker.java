@@ -75,7 +75,7 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
       throw new Exception("Expected response type to be RecordingStarted");
     }
 
-    // TODO Send HTTP and receive response
+    // Send HTTP and receive response
     IHttpService httpService = new IHttpService() {
       @Override
       public String getHost() {
@@ -85,7 +85,6 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
       @Override
       public int getPort() {
         return Integer.parseInt(view.getHttpServerPort());
-        // TODO change return type to int
       }
 
       @Override
@@ -95,7 +94,7 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
     };
     IHttpRequestResponse response = callbacks.makeHttpRequest(httpService, view.getHttpMessage());
 
-    // TODO Send stop recording command
+    // Send stop recording command
     NetUtils.sendMessage(
             PandaMessages.BurpMessage.newBuilder()
                     .setCommand(
@@ -106,7 +105,7 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
                     .build()
             , this.pySock);
 
-    // TODO Receive confirmation of recording stopped
+    // Receive confirmation of recording stopped
     resp = NetUtils.recvMessage(this.pySock);
     if (!resp.hasResponse()) {
       throw new Exception("BurpMessage should include a Response");
@@ -115,7 +114,7 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
       throw new Exception("Expected response type to be RecordingStopped");
     }
 
-    // TODO Send taint bytes
+    // Send taint bytes
     NetUtils.sendMessage(
             PandaMessages.BurpMessage.newBuilder()
                     .setCommand(
@@ -127,7 +126,7 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
                     .build()
             , this.pySock);
 
-    // TODO Receive taint result
+    // Receive taint result
     resp = NetUtils.recvMessage(this.pySock);
     if (!resp.hasResponse()) {
       throw new Exception("BurpMessage should include a Response");
