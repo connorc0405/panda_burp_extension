@@ -51,9 +51,7 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
     // TODO Run ops in EDT thread?
 
     // Open socket
-    if (!connectPandaServer()) {
-      return null;
-    }
+    connectPandaServer();
 
     // Send start recording command
     NetUtils.sendMessage(
@@ -144,9 +142,24 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
   @Override
   protected void done() {
     try {
-      get();
-    } catch (InterruptedException | ExecutionException ex) {
-      ex.printStackTrace(this.stderr);
+      PandaMessages.TaintResult result = get();
+      view.displayTaintResults(result.toString());  // TODO update when format is decided
+    } catch (InterruptedException iEx) {
+      // TODO cancelled run?
+    } catch (ExecutionException eEx) {
+      // Catches any exceptions that occurred during doInBackground
+      Throwable cause = eEx.getCause();
+      String errorMessage;
+      if (cause == null) {
+        errorMessage = "Unknown error";
+      } else {
+        errorMessage = cause.getMessage();
+        cause.printStackTrace(this.stderr);
+      }
+      JOptionPane.showMessageDialog(this.view,
+              errorMessage,
+              "Error",
+              JOptionPane.WARNING_MESSAGE);
     }
   }
 
@@ -155,20 +168,11 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
    * Requirements:
    *  The PANDA server address and port fields must not be empty/invalid.
    *
-   * @return true on success, false on failure.
+   * @throws IOException on error.
    */
-  private boolean connectPandaServer() {
+  private void connectPandaServer() throws IOException {
     String pandaHost = this.view.getPandaServerHost();
     int pandaPort = Integer.parseInt(this.view.getPandaServerPort());
-    try {
-      this.pySock = new Socket(pandaHost, pandaPort);
-    } catch (IOException ex) {
-      JOptionPane.showMessageDialog(this.view,
-              "Could not connect to PANDA server",
-              "Connection Error",
-              JOptionPane.WARNING_MESSAGE);
-      return false;
-    }
-    return true;
+    this.pySock = new Socket(pandaHost, pandaPort);
   }
 }
