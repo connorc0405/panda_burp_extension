@@ -45,6 +45,9 @@ public class NetUtils {
     bytes_read = 0;
     while (bytes_read < payload_buf.length) {
       bytes_read += sock.getInputStream().read(payload_buf, bytes_read, payload_buf.length - bytes_read);
+      if (bytes_read == -1) {
+        throw new SocketException("Socket is closed");
+      }
     }
 
     return PandaMessages.BurpMessage.parseFrom(payload_buf);
