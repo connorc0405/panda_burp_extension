@@ -1,17 +1,17 @@
 package com.ccumming.burp.controller;
 
 import com.ccumming.burp.PandaMessages;
-import com.ccumming.burp.model.IModel;
 import com.ccumming.burp.util.NetUtils;
 import com.ccumming.burp.view.AbstractView;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import burp.IBurpExtenderCallbacks;
@@ -19,7 +19,8 @@ import burp.IHttpRequestResponse;
 import burp.IHttpService;
 
 /**
- * This will run as a new thread and will handle everything from sending the command to start recording, to receiving the final result.
+ * This will run as a new thread and will handle everything from sending the command to start
+ * recording, to receiving the final result.
  */
 public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, Void> {
 
@@ -29,7 +30,8 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
   PrintWriter stdout;
   PrintWriter stderr;
 
-  DoEverythingWorker(AbstractView view, IBurpExtenderCallbacks callbacks, PrintWriter stdout, PrintWriter stderr) {
+  DoEverythingWorker(AbstractView view, IBurpExtenderCallbacks callbacks, PrintWriter stdout,
+                     PrintWriter stderr) {
     super();
     this.view = view;
     this.callbacks = callbacks;
@@ -39,10 +41,9 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
 
   /**
    * Return the results of a PANDA taint run on the selected bytes of user-provided HTTP.
-   * Requirements:
-   *  The HTTP field must not be empty.
-   *  The taint selection field must not be empty.
-   *  The HTTP and PANDA server addresses and ports must not be empty.
+   * Requirements: The HTTP field must not be empty. The taint selection field must not be empty.
+   * The HTTP and PANDA server addresses and ports must not be empty.
+   *
    * @return a {@link com.ccumming.burp.PandaMessages.TaintResult}.
    * @throws Exception if one occurs
    */
@@ -156,17 +157,22 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
         errorMessage = cause.getMessage();
         cause.printStackTrace(this.stderr);
       }
-      JOptionPane.showMessageDialog(this.view,
-              errorMessage,
-              "Error",
-              JOptionPane.WARNING_MESSAGE);
+
+      try {
+        SwingUtilities.invokeAndWait(() ->
+                JOptionPane.showMessageDialog(this.view,
+                        errorMessage,
+                        "Error",
+                        JOptionPane.WARNING_MESSAGE));
+      } catch (InterruptedException | InvocationTargetException e) {
+        e.printStackTrace(this.stderr);
+      }
     }
   }
 
   /**
-   * Open a connection to the PANDA server.
-   * Requirements:
-   *  The PANDA server address and port fields must not be empty/invalid.
+   * Open a connection to the PANDA server. Requirements: The PANDA server address and port fields
+   * must not be empty/invalid.
    *
    * @throws IOException on error.
    */
