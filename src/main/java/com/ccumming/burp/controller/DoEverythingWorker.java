@@ -15,8 +15,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import burp.IBurpExtenderCallbacks;
-import burp.IHttpRequestResponse;
-import burp.IHttpService;
+
 
 /**
  * This will run as a new thread and will handle everything from sending the command to start
@@ -75,23 +74,7 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
     }
 
     // Send HTTP and receive response
-    IHttpService httpService = new IHttpService() {
-      @Override
-      public String getHost() {
-        return view.getHttpServerHost();
-      }
-
-      @Override
-      public int getPort() {
-        return Integer.parseInt(view.getHttpServerPort());
-      }
-
-      @Override
-      public String getProtocol() {
-        return "http";
-      }
-    };
-    IHttpRequestResponse response = callbacks.makeHttpRequest(httpService, view.getHttpMessage());
+    byte[] response = callbacks.makeHttpRequest(view.getHttpServerHost(), Integer.parseInt(view.getHttpServerPort()), false, view.getHttpMessage());
 
     // Send stop recording command
     NetUtils.sendMessage(
