@@ -171,7 +171,9 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
   }
 
   /**
-   * Open a connection to the PANDA server. Requirements: The PANDA server address and port fields
+   * Open a connection to the PANDA server.
+   * Sets the socket timeout to 10 seconds.
+   * Requirements: The PANDA server address and port fields
    * must not be empty/invalid.
    *
    * @throws IOException on error.
@@ -180,5 +182,6 @@ public class DoEverythingWorker extends SwingWorker<PandaMessages.TaintResult, V
     String pandaHost = this.view.getPandaServerHost();
     int pandaPort = Integer.parseInt(this.view.getPandaServerPort());
     this.pySock = new Socket(pandaHost, pandaPort);
+    this.pySock.setSoTimeout(10*1000);
   }
 }
