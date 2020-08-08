@@ -57,4 +57,10 @@ public interface IView extends ITab {
    */
   String getPandaServerPort();
 
+  /**
+   * Display a message to the user.
+   * @param message the message to be displayed.
+   */
+  void alertUser(String message);
+
 }

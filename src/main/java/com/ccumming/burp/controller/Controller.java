@@ -2,16 +2,14 @@ package com.ccumming.burp.controller;
 
 import com.ccumming.burp.PandaMessages;
 import com.ccumming.burp.model.IModel;
-import com.ccumming.burp.view.AbstractView;
+import com.ccumming.burp.view.IView;
 
 import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+
 import javax.swing.SwingWorker;
 
 import burp.IBurpExtenderCallbacks;
@@ -19,11 +17,11 @@ import burp.IBurpExtenderCallbacks;
 public class Controller implements IController {
 
   private final IModel model;
-  private final AbstractView view;
+  private final IView view;
   private final PrintWriter stdout;
   private final PrintWriter stderr;
 
-  public Controller(IModel model, AbstractView view, IBurpExtenderCallbacks callbacks) {
+  public Controller(IModel model, IView view, IBurpExtenderCallbacks callbacks) {
     this.model = model;
     this.view = view;
     this.stdout = new PrintWriter(callbacks.getStdout(), true);
@@ -64,15 +62,7 @@ public class Controller implements IController {
               cause.printStackTrace(stderr);
             }
 
-            try {
-              SwingUtilities.invokeAndWait(() ->
-                      JOptionPane.showMessageDialog(view,
-                              errorMessage,
-                              "Error",
-                              JOptionPane.WARNING_MESSAGE));
-            } catch (InterruptedException | InvocationTargetException e) {
-              e.printStackTrace(stderr);
-            }
+            view.alertUser(errorMessage);
           }
         }
       };
@@ -94,39 +84,27 @@ public class Controller implements IController {
 
     // Check HTTP server address and port
     if (!model.isValidHostname(view.getHttpServerHost()) || !model.isValidPort(view.getHttpServerPort())) {
-      JOptionPane.showMessageDialog(this.view,
-              "Valid HTTP server address and port are required",
-              dialogTitle,
-              JOptionPane.WARNING_MESSAGE);
+      view.alertUser("Valid HTTP server address and port are required");
       return false;
     }
 
     // Check PANDA server address and port
     if (!model.isValidHostname(view.getPandaServerHost()) || !model.isValidPort(view.getPandaServerPort())) {
-      JOptionPane.showMessageDialog(this.view,
-              "Valid PANDA server address and port are required",
-              dialogTitle,
-              JOptionPane.WARNING_MESSAGE);
+      view.alertUser("Valid PANDA server address and port are required");
       return false;
     }
 
     // Check HTTP not null (empty)
     byte[] httpMsg = view.getHttpMessage();
     if (httpMsg == null) {
-      JOptionPane.showMessageDialog(this.view,
-              "HTTP message cannot be empty",
-              dialogTitle,
-              JOptionPane.WARNING_MESSAGE);
+      view.alertUser("HTTP message cannot be empty");
       return false;
     }
 
     // Validate taint selection formatting
     String taintSelection = view.getTaintSelection();
     if (!model.validateTaintSelection(taintSelection)) {
-      JOptionPane.showMessageDialog(this.view,
-              "Taint selection is empty or invalid",
-              dialogTitle,
-              JOptionPane.WARNING_MESSAGE);
+      view.alertUser("Taint selection is empty or invalid");
       return false;
     }
 

@@ -7,10 +7,15 @@ import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
+import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.nio.charset.StandardCharsets;
 
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 import burp.IBurpExtenderCallbacks;
 import burp.IMessageEditor;
@@ -18,14 +23,17 @@ import burp.ITab;
 import burp.ITextEditor;
 
 
-public class PandaTabView extends AbstractView implements ITab {
+public class PandaTabView extends JPanel implements ITab, IView {
 
   private final HostControlPanel hostControlPanel;
   private final JTextArea taintResults;
   private final ITextEditor taintGroupEditor;
   private final IMessageEditor requestEditor;
 
+  private final PrintWriter stderr;
+
   public PandaTabView(IBurpExtenderCallbacks callbacks) {
+    this.stderr = new PrintWriter(callbacks.getStderr(), true);
     hostControlPanel = new HostControlPanel();
     hostControlPanel.setBackground(Color.LIGHT_GRAY);
 
@@ -109,6 +117,27 @@ public class PandaTabView extends AbstractView implements ITab {
   @Override
   public String getPandaServerPort() {
     return this.hostControlPanel.getPandaServerPort();
+  }
+
+  @Override
+  public void alertUser(String message) {
+    if (SwingUtilities.isEventDispatchThread()) { // If on EDT, must call directly (else will block).
+      JOptionPane.showMessageDialog(this,
+              message,
+              "Alert",
+              JOptionPane.WARNING_MESSAGE);
+    } else {
+      try {
+        SwingUtilities.invokeAndWait(() ->
+                JOptionPane.showMessageDialog(this,
+                        message,
+                        "Alert",
+                        JOptionPane.WARNING_MESSAGE));
+      } catch (InterruptedException | InvocationTargetException e) {
+        e.printStackTrace(stderr);
+      }
+    }
+
   }
 
 }
