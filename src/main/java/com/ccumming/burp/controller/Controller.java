@@ -6,9 +6,12 @@ import com.ccumming.burp.view.AbstractView;
 
 import java.awt.event.ActionEvent;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.ExecutionException;
 
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import burp.IBurpExtenderCallbacks;
@@ -17,14 +20,12 @@ public class Controller implements IController {
 
   private final IModel model;
   private final AbstractView view;
-  private final IBurpExtenderCallbacks callbacks;
   private final PrintWriter stdout;
   private final PrintWriter stderr;
 
   public Controller(IModel model, AbstractView view, IBurpExtenderCallbacks callbacks) {
     this.model = model;
     this.view = view;
-    this.callbacks = callbacks;
     this.stdout = new PrintWriter(callbacks.getStdout(), true);
     this.stderr = new PrintWriter(callbacks.getStderr(), true);
   }
@@ -32,17 +33,52 @@ public class Controller implements IController {
   @Override
   public void actionPerformed(ActionEvent e) {
     JButton buttonPressed = (JButton)e.getSource();
-    switch (buttonPressed.getText()) {
-      case "Send":
-        if (!validateSendInput()) {
-          return;
+    if ("Send".equals(buttonPressed.getText())) {
+      if (!validateSendInput()) {  // Do this in model?
+        return;
+      }
+      SwingWorker<PandaMessages.TaintResult, Void> worker = new SwingWorker<>() {
+        @Override
+        protected PandaMessages.TaintResult doInBackground() throws Exception {
+          return model.runRRAndTaint(view.getPandaServerHost(),
+                  Integer.parseInt(view.getPandaServerPort()), view.getHttpServerHost(),
+                  Integer.parseInt(view.getHttpServerPort()), view.getHttpMessage(),
+                  view.getTaintSelection());
         }
-        SwingWorker<PandaMessages.TaintResult, Void> worker = new DoEverythingWorker(this.view, this.callbacks, this.stdout, this.stderr);
-        worker.execute();
-        break;
-      default:
-        this.stderr.println("Idk that button");
-        break;
+
+        @Override
+        protected void done() {
+          try {
+            PandaMessages.TaintResult result = get();
+            view.displayTaintResults(result.toString());  // TODO update when format is decided
+          } catch (InterruptedException iEx) {
+            // TODO cancelled run?
+          } catch (ExecutionException eEx) {
+            // Catches any exceptions that occurred during doInBackground
+            Throwable cause = eEx.getCause();
+            String errorMessage;
+            if (cause == null) {
+              errorMessage = "Unknown error";
+            } else {
+              errorMessage = cause.getMessage();
+              cause.printStackTrace(stderr);
+            }
+
+            try {
+              SwingUtilities.invokeAndWait(() ->
+                      JOptionPane.showMessageDialog(view,
+                              errorMessage,
+                              "Error",
+                              JOptionPane.WARNING_MESSAGE));
+            } catch (InterruptedException | InvocationTargetException e) {
+              e.printStackTrace(stderr);
+            }
+          }
+        }
+      };
+      worker.execute();
+    } else {
+      this.stderr.println("Idk that button");
     }
     stdout.println(((JButton)e.getSource()).getText() + " was pressed.");
   }

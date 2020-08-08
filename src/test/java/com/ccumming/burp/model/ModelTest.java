@@ -6,7 +6,7 @@ class ModelTest {
 
   @org.junit.jupiter.api.Test
   void validateTaintSelection() {
-    Model m = new Model();
+    Model m = new Model(null);
     assertTrue(m.validateTaintSelection("1"));
     assertTrue(m.validateTaintSelection("1,2"));
     assertTrue(m.validateTaintSelection("1:2"));

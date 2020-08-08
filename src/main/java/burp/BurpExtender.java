@@ -16,7 +16,7 @@ public class BurpExtender implements IBurpExtender {
         callbacks.setExtensionName("PANDA HTTP CMP Analysis");
 
         // TODO do this in EDT thread?
-        IModel model = new Model();
+        IModel model = new Model(callbacks);
         AbstractView pandaTab = new PandaTabView(callbacks);
         IController controller = new Controller(model, pandaTab, callbacks);
 
