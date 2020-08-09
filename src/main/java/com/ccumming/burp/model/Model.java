@@ -185,6 +185,6 @@ public class Model implements IModel {
    */
   private void connectPandaServer(String pandaServerHost, int pandaServerPort) throws IOException {
     this.pySock = new Socket(pandaServerHost, pandaServerPort);
-    this.pySock.setSoTimeout(10*3000);
+    this.pySock.setSoTimeout(30*3000);
   }
 }
