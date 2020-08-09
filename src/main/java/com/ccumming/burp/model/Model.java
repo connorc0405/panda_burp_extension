@@ -4,7 +4,6 @@ import com.ccumming.burp.PandaMessages;
 import com.ccumming.burp.util.NetUtils;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.Socket;
 
 import burp.IBurpExtenderCallbacks;
@@ -94,7 +93,6 @@ public class Model implements IModel {
   public PandaMessages.TaintResult runRRAndTaint(String pandaServerHost, int pandaServerPort,
                                                  String httpServerHost, int httpServerPort,
                                                  byte[] httpMsg, String taintSelection) throws Exception {
-      // TODO Run ops in EDT thread?
 
       // Open socket
       connectPandaServer(pandaServerHost, pandaServerPort);
@@ -109,8 +107,6 @@ public class Model implements IModel {
                       )
                       .build()
               , this.pySock);
-    new PrintWriter(callbacks.getStdout(), true).println("sent start");
-
 
     // Receive confirmation of recording start
       PandaMessages.BurpMessage resp = NetUtils.recvMessage(this.pySock);
@@ -120,10 +116,10 @@ public class Model implements IModel {
       if (resp.getResponse().getRespType() != PandaMessages.ResponseType.RecordingStarted) {
         throw new Exception("Expected response type to be RecordingStarted");
       }
-      new PrintWriter(callbacks.getStdout(), true).println("Got start confirmation");
+
       // Send HTTP and receive response
       callbacks.makeHttpRequest(httpServerHost, httpServerPort, false, httpMsg);
-    new PrintWriter(callbacks.getStdout(), true).println("sent http");
+
       // Send stop recording command
       NetUtils.sendMessage(
               PandaMessages.BurpMessage.newBuilder()
@@ -134,7 +130,6 @@ public class Model implements IModel {
                       )
                       .build()
               , this.pySock);
-    new PrintWriter(callbacks.getStdout(), true).println("sent stop");
 
       // Receive confirmation of recording stopped
       resp = NetUtils.recvMessage(this.pySock);
@@ -144,7 +139,6 @@ public class Model implements IModel {
       if (resp.getResponse().getRespType() != PandaMessages.ResponseType.RecordingStopped) {
         throw new Exception("Expected response type to be RecordingStopped");
       }
-    new PrintWriter(callbacks.getStdout(), true).println("got stop");
 
       // Send taint bytes
       NetUtils.sendMessage(
@@ -157,7 +151,6 @@ public class Model implements IModel {
                       )
                       .build()
               , this.pySock);
-    new PrintWriter(callbacks.getStdout(), true).println("sent taint");
 
     // Receive taint result
       resp = NetUtils.recvMessage(this.pySock);
@@ -170,7 +163,6 @@ public class Model implements IModel {
       if (!resp.getResponse().hasTaintResult()) {
         throw new Exception("Expected response to include TaintResult");
       }
-    new PrintWriter(callbacks.getStdout(), true).println("got ret");
 
     return resp.getResponse().getTaintResult();
     }
