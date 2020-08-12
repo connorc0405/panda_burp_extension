@@ -1,34 +1,35 @@
 package com.ccumming.burp.view;
 
-import com.ccumming.burp.HostControlPanel;
-
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.nio.charset.StandardCharsets;
 
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultHighlighter;
+import javax.swing.text.Highlighter;
 
 import burp.IBurpExtenderCallbacks;
-import burp.IMessageEditor;
 import burp.ITab;
-import burp.ITextEditor;
 
 
 public class PandaTabView extends JPanel implements ITab, IView {
 
   private final HostControlPanel hostControlPanel;
   private final JTextArea taintResults;
-  private final ITextEditor taintGroupEditor;
-  private final IMessageEditor requestEditor;
+  private final JTextArea requestEditor;
 
   private final PrintWriter stderr;
 
@@ -48,16 +49,65 @@ public class PandaTabView extends JPanel implements ITab, IView {
     c.weightx = 1.0;
     this.add(hostControlPanel, c);
 
-    this.requestEditor = callbacks.createMessageEditor(null, true);
+    // Request editor
+    this.requestEditor = new JTextArea();
+    requestEditor.setText("GET / HTTP/1.1\r\n");
+    Highlighter highlighter = new DefaultHighlighter();
+    requestEditor.setHighlighter(highlighter);
+    Highlighter.HighlightPainter painter = new DefaultHighlighter.DefaultHighlightPainter(Color.YELLOW);
+    requestEditor.addMouseListener(new MouseAdapter() {
+      @Override
+      public void mousePressed(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+          doPopUp(e);
+        }
+      }
+      @Override
+      public void mouseReleased(MouseEvent e) {
+        if (e.isPopupTrigger()) {
+          doPopUp(e);
+        }
+      }
 
-    this.taintGroupEditor = callbacks.createTextEditor();
+      private void doPopUp(MouseEvent ev) {
+        JPopupMenu menu = new JPopupMenu();
 
-    JSplitPane editorSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT, requestEditor.getComponent(), taintGroupEditor.getComponent());
+        JMenuItem addTaintMenuItem = new JMenuItem("Taint selection");
+        if (addTaintMenuItem.getActionListeners().length == 0) {
+          addTaintMenuItem.addActionListener(e -> {
+            stderr.println("Taint selection action listener called");
+            int selectionStart = requestEditor.getSelectionStart();
+            int selectionEnd = requestEditor.getSelectionEnd();
+            if (selectionStart != selectionEnd) {
+              try {
+                highlighter.addHighlight(selectionStart, selectionEnd, painter);
+              } catch (BadLocationException badLocationException) {
+                badLocationException.printStackTrace(stderr);
+              }
 
+            }
+          });
+        }
+        menu.add(addTaintMenuItem);
+
+        JMenuItem removeTaintMenuItem = new JMenuItem("Remove all taint selections");
+        if (removeTaintMenuItem.getActionListeners().length == 0) {
+          removeTaintMenuItem.addActionListener(e -> {
+            highlighter.removeAllHighlights();
+          });
+        }
+        menu.add(removeTaintMenuItem);
+
+        menu.show(requestEditor, ev.getX(), ev.getY());
+      }
+    });
+
+    // Taint results
     this.taintResults = new JTextArea();
     taintResults.setText("Taint Results Placeholder!!!!");
     taintResults.setEditable(false);
-    JSplitPane editorResultsSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, editorSplit, taintResults);
+
+    JSplitPane editorResultsSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestEditor, taintResults);
 
     c.fill = GridBagConstraints.BOTH;
     c.anchor = GridBagConstraints.EAST;
@@ -81,12 +131,40 @@ public class PandaTabView extends JPanel implements ITab, IView {
 
   @Override
   public byte[] getHttpMessage() {
-    return this.requestEditor.getMessage();
+    return this.requestEditor.getText().getBytes();
   }
 
   @Override
   public String getTaintSelection() {
-    return new String(taintGroupEditor.getText(), StandardCharsets.UTF_8);
+    // NOTE: Below code assumes no overlapping highlights.
+    Highlighter.Highlight[] highlights = requestEditor.getHighlighter().getHighlights();
+
+    int numHighlights = highlights.length;
+    if (requestEditor.getSelectedText() != null) {
+      // For some reason, any currently selected (but not highlighted) text will be included in the
+      // output of getHighlights.
+      numHighlights--;
+    }
+
+    StringBuilder taintSelectionBuilder = new StringBuilder();
+    for (int i = 0; i < numHighlights; i++) {
+      int startOffset = highlights[i].getStartOffset();
+      int endOffset = highlights[i].getEndOffset();
+      stderr.println(startOffset);
+      stderr.println(endOffset);
+      if (endOffset - startOffset == 1) {  // One byte
+        taintSelectionBuilder.append(startOffset);
+      } else {
+        taintSelectionBuilder.append(highlights[i].getStartOffset())
+                .append(":")
+                .append(highlights[i].getEndOffset());
+      }
+      if (i != highlights.length - 1) {
+        taintSelectionBuilder.append(",");
+      }
+    }
+
+    return taintSelectionBuilder.toString();
   }
 
   @Override

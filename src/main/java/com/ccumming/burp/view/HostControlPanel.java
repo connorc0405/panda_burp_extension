@@ -1,4 +1,4 @@
-package com.ccumming.burp;
+package com.ccumming.burp.view;
 
 import java.awt.event.ActionListener;
 
