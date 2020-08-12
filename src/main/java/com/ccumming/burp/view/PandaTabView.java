@@ -108,6 +108,7 @@ public class PandaTabView extends JPanel implements ITab, IView {
     taintResults.setEditable(false);
 
     JSplitPane editorResultsSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, requestEditor, taintResults);
+    editorResultsSplit.setResizeWeight(.5d);
 
     c.fill = GridBagConstraints.BOTH;
     c.anchor = GridBagConstraints.EAST;
