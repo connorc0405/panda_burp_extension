@@ -75,7 +75,6 @@ public class PandaTabView extends JPanel implements ITab, IView {
         JMenuItem addTaintMenuItem = new JMenuItem("Taint selection");
         if (addTaintMenuItem.getActionListeners().length == 0) {
           addTaintMenuItem.addActionListener(e -> {
-            stderr.println("Taint selection action listener called");
             int selectionStart = requestEditor.getSelectionStart();
             int selectionEnd = requestEditor.getSelectionEnd();
             if (selectionStart != selectionEnd) {
@@ -151,8 +150,6 @@ public class PandaTabView extends JPanel implements ITab, IView {
     for (int i = 0; i < numHighlights; i++) {
       int startOffset = highlights[i].getStartOffset();
       int endOffset = highlights[i].getEndOffset();
-      stderr.println(startOffset);
-      stderr.println(endOffset);
       if (endOffset - startOffset == 1) {  // One byte
         taintSelectionBuilder.append(startOffset);
       } else {
